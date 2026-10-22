@@ -1,0 +1,24 @@
+<!-- Insert in index.html after obtaining school approval and deploying Apps Script. -->
+<script>
+const API_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL";
+const DEVICE_SESSION = crypto.randomUUID?.() || String(Date.now());
+async function saveLearningResult({studentId,moduleId,skillId,stage,correct,total,durationSeconds=0,attempts=1}) {
+  const payload = {
+    action:"record", eventId: crypto.randomUUID().replaceAll("-",""),
+    studentId,moduleId,skillId,stage,correct,total,durationSeconds,attempts,
+    deviceSession:DEVICE_SESSION
+  };
+  // Apps Script web app redirects can make browser CORS responses unavailable.
+  // mode:no-cors sends data but DOES NOT confirm saving. Never report success
+  // based on this fetch alone. Use an approved authenticated endpoint for production.
+  await fetch(API_URL,{
+    method:"POST",mode:"no-cors",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(payload)
+  });
+  return {submitted:true,confirmed:false};
+}
+// Example: call after a completed practice or game round:
+// saveLearningResult({studentId:"P1A-001",moduleId:"SM",skillId:"b",
+//   stage:"practice",correct:4,total:5}).then(console.log);
+</script>
